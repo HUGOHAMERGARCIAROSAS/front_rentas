@@ -10,11 +10,16 @@ const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, loading, error } = useSelector((state) => state.auth.user);
+
+  const { user, loading, error } = useSelector((state) => state.auth);
+
+  // console.log('User object:', user);
+
+  // let loading, error;
 
   const [credentials, setCredentials] = useState({
-    username: "",
-    password: "",
+    per_login: "48626692",
+    password: "123456789",
   });
 
   const handleChange = (e) => {
@@ -25,9 +30,10 @@ const Login = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     dispatch(loginUser(credentials))
-      .unwrap()
+      // .unwrap()
       .then(() => {
-        navigate("/dashboard"); // Redirigir a la página deseada después del inicio de sesión
+        console.log("exito");
+        // navigate("/dashboard"); // Redirigir a la página deseada después del inicio de sesión
       })
       .catch(() => {
         // Manejar errores aquí si es necesario
@@ -59,8 +65,8 @@ const Login = () => {
                 type="text"
                 placeholder="Usuario"
                 className="input"
-                name="username"
-                value={credentials.username}
+                name="per_login"
+                value={credentials.per_login}
                 onChange={handleChange}
                 required
               />
@@ -87,7 +93,7 @@ const Login = () => {
             </div>
             <button
               type="submit" disabled={loading}
-              onClick={handleLogin}
+              onClick={handleSubmit}
               className="login-button"
             >
               {loading ? 'Logging in...' : 'Login'}
