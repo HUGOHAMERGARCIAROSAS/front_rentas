@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
-import { loginUser } from "../../redux/slices/authSlice";
+import { loginUser, selectAuth } from "../../redux/slices/authSlice";
 
 import "../../assets/css/login.css";
 
@@ -11,9 +11,9 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { user, loading, error } = useSelector((state) => state.auth);
+  const { user, loading, error } = useSelector(selectAuth);
 
-  // console.log('User object:', user);
+  // console.log('User object:', user.estado);
 
   // let loading, error;
 
@@ -30,22 +30,21 @@ const Login = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     dispatch(loginUser(credentials))
-      // .unwrap()
+      .unwrap()
       .then(() => {
-        console.log("exito");
-        // navigate("/dashboard"); // Redirigir a la página deseada después del inicio de sesión
+        navigate("/dashboard"); // Redirigir a la página deseada después del inicio de sesión
       })
       .catch(() => {
         // Manejar errores aquí si es necesario
       });
   };
 
-  // useEffect(() => {
-  //   if (user) {
-  //     const { from } = location.state || { from: { pathname: "/dashboard" } };
-  //     navigate(from.pathname);
-  //   }
-  // }, [user, location.state, navigate]);
+  useEffect(() => {
+    if (user) {
+      const { from } = location.state || { from: { pathname: "/dashboard" } };
+      navigate(from.pathname);
+    }
+  }, [user, location.state, navigate]);
 
   // const handleLogin = () => {
   //   dispatch(login({ username: "user" }));
