@@ -12,7 +12,7 @@ function App() {
     <Provider store={store}>
       <Router>
         <Routes>
-        <Route path="/" element={<Login />} />
+          <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<Dashboard />} />
@@ -22,7 +22,5 @@ function App() {
     </Provider>
   );
 }
-
-  
 
 export default App;

@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { loginUser, selectAuth } from "../../redux/slices/authSlice";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import "../../assets/css/login.css";
 
@@ -11,32 +13,69 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { user, loading, error } = useSelector(selectAuth);
-
-  // console.log('User object:', user.estado);
-
-  // let loading, error;
+  const { user, loading } = useSelector(selectAuth);
 
   const [credentials, setCredentials] = useState({
-    per_login: "48626692",
-    password: "123456789",
+    per_login: "",
+    password: ""
   });
+
+  const [rememberMe, setRememberMe] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setCredentials({ ...credentials, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleRememberMe = (e) => {
+    setRememberMe(e.target.checked);
+  };
+
+  useEffect(() => {
+    const savedUsername = localStorage.getItem("username");
+    if (savedUsername) {
+      setCredentials({ ...credentials, per_login: savedUsername });
+      setRememberMe(true);
+    }
+    console.log(credentials);
+  }, []);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(loginUser(credentials))
-      .unwrap()
-      .then(() => {
-        navigate("/dashboard"); // Redirigir a la página deseada después del inicio de sesión
-      })
-      .catch(() => {
-        // Manejar errores aquí si es necesario
-      });
+
+    try {
+      const loginPromise = dispatch(loginUser(credentials)).unwrap();
+
+      toast.promise(
+        loginPromise,
+        {
+          pending: "Iniciando sesión...",
+          success: "¡Inicio de sesión exitoso!",
+          error: "Error al iniciar sesión",
+        },
+        {
+          position: "top-center",
+        }
+      );
+
+      await loginPromise;
+
+      if (rememberMe) {
+        localStorage.setItem("username", credentials.per_login);
+      } else {
+        localStorage.removeItem("username");
+      }
+
+      setTimeout(() => {
+        navigate("/dashboard", { replace: true });
+      }, 2000);
+    } catch (error) {
+      if (error.response && error.response.status === 401) {
+        toast.error("Usuario no encontrado o credenciales incorrectas.");
+      } else {
+        toast.error(error);
+      }
+    }
   };
 
   useEffect(() => {
@@ -45,12 +84,6 @@ const Login = () => {
       navigate(from.pathname);
     }
   }, [user, location.state, navigate]);
-
-  // const handleLogin = () => {
-  //   dispatch(login({ username: "user" }));
-  //   const { from } = location.state || { from: { pathname: "/dashboard" } };
-  //   navigate(from.pathname);
-  // };
 
   return (
     <div className="login-container">
@@ -83,7 +116,11 @@ const Login = () => {
             </div>
             <div className="login-options">
               <label>
-                <input type="checkbox" />
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={handleRememberMe}
+                />
                 Recordarme
               </label>
               <a href="#" className="forgot-password">
@@ -91,11 +128,12 @@ const Login = () => {
               </a>
             </div>
             <button
-              type="submit" disabled={loading}
+              type="submit"
+              disabled={loading}
               onClick={handleSubmit}
               className="login-button"
             >
-              {loading ? 'Logging in...' : 'Login'}
+              {loading ? "Logging in..." : "Login"}
             </button>
           </form>
         </div>
@@ -115,6 +153,7 @@ const Login = () => {
           </p>
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 };
